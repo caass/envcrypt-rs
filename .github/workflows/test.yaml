@@ -36,6 +36,8 @@ jobs:
     name: Lint
     steps:
       - uses: actions/checkout@v2
+        name: Checkout Repo
       - uses: actions-rs/cargo@v1
+        name: Run Clippy
         with:
           command: clippy
