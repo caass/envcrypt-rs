@@ -53,10 +53,10 @@ pub mod __internal {
     use magic_crypt::{MagicCrypt256, MagicCryptTrait};
 
     #[doc(hidden)]
-    pub unsafe fn decrypt(key: &str, iv: &str, encrypted_value: &[u8]) -> String {
+    pub fn decrypt(key: &str, iv: &str, encrypted_value: &[u8]) -> String {
         let magic = MagicCrypt256::new(key, Some(iv));
         let decrypted = magic.decrypt_bytes_to_bytes(encrypted_value).unwrap();
-        String::from_utf8_unchecked(decrypted)
+        String::from_utf8(decrypted).unwrap()
     }
 }
 

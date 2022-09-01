@@ -18,7 +18,7 @@ pub fn envcrypt(tokens: TokenStream) -> TokenStream {
     let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
 
     quote! {
-        unsafe {
+        {
             envcrypt::__internal::decrypt(#key, #iv, #encrypted)
         }
     }
