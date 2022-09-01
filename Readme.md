@@ -4,7 +4,7 @@ Drop-in replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
 that encrypts your variables at compile-time and decrypts them at runtime,
 preventing naughty folks from snooping your binary for secrets or credentials.
 
-## Usage
+### Usage
 
 ```rust
 use envcrypt::envcrypt;
@@ -46,6 +46,8 @@ fn main() {
 }
 ```
 
-## Details
+### Details
 
 Encryption is powered by [`MagicCrypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption.
+
+License: MIT OR Apache-2.0
