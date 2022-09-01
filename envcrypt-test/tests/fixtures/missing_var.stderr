@@ -1,0 +1,7 @@
+error: environment variable `MISSING` not defined
+ --> tests/fixtures/missing_var.rs:4:5
+  |
+4 |     envcrypt!("MISSING")
+  |     ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `envcrypt` (in Nightly builds, run with -Z macro-backtrace for more info)

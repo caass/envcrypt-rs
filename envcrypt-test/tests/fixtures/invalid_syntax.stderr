@@ -1,0 +1,7 @@
+error: Invalid syntax. Valid forms are `envcrypt!("KEY")` and `envcrypt!("KEY", "error message")`
+ --> tests/fixtures/invalid_syntax.rs:4:5
+  |
+4 |     envcrypt!("this" => "is", wrong)
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `envcrypt` (in Nightly builds, run with -Z macro-backtrace for more info)
