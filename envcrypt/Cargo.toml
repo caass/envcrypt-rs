@@ -1,7 +1,7 @@
 [package]
 authors = ["Cass Fridkin <cass@swag.lgbt>"]
 categories = ["cryptography", "development-tools::build-utils"]
-description = "Drop-in replacement for env! that encrypts your variables at compile-time and decrypts them at runtime, preventing naughty folks from snooping your binary for secrets or credentials."
+description = "Drop-in replacement for env! that encrypts your variables at compile-time and decrypts them at runtime."
 edition = "2021"
 keywords = [
   "environment-variables",

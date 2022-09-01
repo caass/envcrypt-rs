@@ -4,6 +4,7 @@ name: CI
 on: push
 jobs:
   build-and-test:
+    name: Build and Test
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -13,24 +14,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+        name: Checkout Repo
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+        name: Install Rust ${{ matrix.toolchain }}
       - uses: actions-rs/cargo@v1
+        name: Build
         with:
           command: build
           toolchain: ${{ matrix.toolchain }}
           args: ${{ matrix.mode }} --verbose
       - uses: actions-rs/cargo@v1
+        name: Test
         with:
           command: test
           toolchain: ${{ matrix.toolchain }}
           args: ${{ matrix.mode }} --verbose
   lint:
     runs-on: ubuntu-latest
+    name: Lint
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -- --deny clippy::all --deny clippy::pedantic --deny clippy::cargo
