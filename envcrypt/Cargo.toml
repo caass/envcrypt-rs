@@ -19,5 +19,5 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-envcrypt-macro = { path = "../envcrypt-macro" }
+envcrypt-macro = { path = "../envcrypt-macro", version = "0.1.0" }
 magic-crypt    = "3.1.10"
