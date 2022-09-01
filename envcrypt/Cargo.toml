@@ -6,7 +6,7 @@ edition = "2021"
 keywords = [
   "environment-variables",
   "encrypt-environment",
-  "encrypt-enviroment-variables",
+  "encrypt-variables",
   "encrypt-env",
   "encrypt-env-vars",
 ]
