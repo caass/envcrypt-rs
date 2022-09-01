@@ -4,8 +4,6 @@ Drop-in replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
 that encrypts your variables at compile-time and decrypts them at runtime,
 preventing naughty folks from snooping your binary for secrets or credentials.
 
-Inspired by [`litcrypt`](https://crates.io/crates/litcrypt).
-
 ## Usage
 
 ```rust
