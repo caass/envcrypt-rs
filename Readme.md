@@ -32,8 +32,9 @@ SOME_TOKEN="some_token"
 fn main() {
   println!("cargo:rerun-if-changed=.env");
 
-  for (key, value) in dotenv::vars();
+  for (key, value) in dotenv::vars() {
     println!("cargo:rustc-env=${key}=${value}");
+  }
 }
 ```
 

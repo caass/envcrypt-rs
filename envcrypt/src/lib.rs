@@ -1,4 +1,4 @@
-#![doc = include_str!("../../Readme.md")]
+#![cfg_attr(not(doctest), doc = include_str!("../../Readme.md"))]
 
 #[doc(hidden)]
 pub mod __internal {

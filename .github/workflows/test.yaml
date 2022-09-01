@@ -9,6 +9,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         mode: ["", "--release"]
         toolchain: [stable, beta, nightly]
+      fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
