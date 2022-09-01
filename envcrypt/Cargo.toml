@@ -1,0 +1,23 @@
+[package]
+authors = ["Cass Fridkin <cass@swag.lgbt>"]
+categories = ["cryptography", "development-tools::build-utils"]
+description = "Drop-in replacement for env! that encrypts your variables at compile-time and decrypts them at runtime, preventing naughty folks from snooping your binary for secrets or credentials."
+edition = "2021"
+keywords = [
+  "environment-variables",
+  "encrypt-environment",
+  "encrypt-enviroment-variables",
+  "encrypt-env",
+  "encrypt-env-vars",
+]
+license = "MIT OR Apache-2.0"
+name = "envcrypt"
+readme = "../Readme.md"
+repository = "https://github.com/caass/envcrypt"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+envcrypt-macro = { path = "../envcrypt-macro" }
+magic-crypt    = "3.1.10"

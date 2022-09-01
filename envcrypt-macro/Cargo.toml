@@ -1,0 +1,17 @@
+[package]
+edition = "2021"
+name    = "envcrypt-macro"
+publish = false
+version = "0.0.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path       = "src/lib.rs"
+proc-macro = true
+
+[dependencies]
+magic-crypt = "3.1.10"
+proc-macro2 = "1.0.43"
+quote       = "1.0.21"
+rand        = "0.8.5"
