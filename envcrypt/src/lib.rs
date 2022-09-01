@@ -1,9 +1,8 @@
-//! # envcrypt
 //! Drop-in replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
 //! that encrypts your variables at compile-time and decrypts them at runtime,
 //! preventing naughty folks from snooping your binary for secrets or credentials.
 //!
-//! ## Usage
+//! # Usage
 //!
 //! ```ignore
 //! use envcrypt::envcrypt;
@@ -45,7 +44,7 @@
 //! }
 //! ```
 //!
-//! ## Details
+//! # Details
 //!
 //! Encryption is powered by [`MagicCrypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption.
 
@@ -54,18 +53,17 @@ pub mod __internal {
     use magic_crypt::{MagicCrypt256, MagicCryptTrait};
 
     #[doc(hidden)]
-    pub fn decrypt(
-        key: impl AsRef<str>,
-        iv: impl AsRef<str>,
-        encrypted_value: impl AsRef<str>,
-    ) -> String {
-        let magic = MagicCrypt256::new(key.as_ref(), Some(iv.as_ref()));
-        magic
-            .decrypt_base64_to_string(encrypted_value.as_ref())
-            .unwrap()
+    pub unsafe fn decrypt(key: &str, iv: &str, encrypted_value: &[u8]) -> String {
+        let magic = MagicCrypt256::new(key, Some(iv));
+        let decrypted = magic.decrypt_bytes_to_bytes(encrypted_value).unwrap();
+        String::from_utf8_unchecked(decrypted)
     }
 }
 
 /// Encrypt an environment variable at compile time,
 /// and decrypt it at runtime.
+///
+/// ```ignore
+/// let my_secret = envcrypt!("MY_SECRET");
+/// let uh_oh = envcrypt!("NOT_FOUND", "This variable wasn't found!")
 pub use envcrypt_macro::envcrypt;
