@@ -4,7 +4,7 @@ categories = ["cryptography", "development-tools::build-utils"]
 description = "Encrypt environment variables at compile-time and decrypt them at runtime."
 edition = "2021"
 keywords = [
-  "environment-variables",
+  "environment-vars",
   "encrypt-environment",
   "encrypt-variables",
   "encrypt-env",
