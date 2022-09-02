@@ -9,8 +9,8 @@ While it's still possible to reverse-engineer the values, `envcrypt` prevents
 `strings <my-binary>` from trivially finding embedded secrets.
 
 Since the secret must be decrypted at runtime,
-`envc!` returns an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
-instead of `&'static str`. Its API otherwise mirrors [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html).
+[`envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.envc.html) and [`option_envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.option_envc.html) return an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
+instead of `&'static str`. The API otherwise mirrors [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html).
 
 ## Usage
 
@@ -104,5 +104,3 @@ NAKED_VALUE
 Here are instructions for running `strings` yourself on [MacOS](https://www.unix.com/man-page/osx/1/strings/), [Linux](https://linux.die.net/man/1/strings), and [Windows](https://docs.microsoft.com/en-us/sysinternals/downloads/strings).
 
 Inspired by [`litcrypt`](https://crates.io/crates/litcrypt), which I would have used except I want to open-source my code.
-
-Dual-Licensed under MIT or APACHE-2.0.
