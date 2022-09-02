@@ -1,6 +1,6 @@
 #![deny(missing_docs, clippy::missing_docs_in_private_items)]
-#![cfg_attr(windows, doc = include_str!("..\\..\\README.md"))]
-#![cfg_attr(not(windows), doc = include_str!("../../README.md"))]
+#![cfg_attr(windows, doc = include_str!("..\\README.md"))]
+#![cfg_attr(not(windows), doc = include_str!("../README.md"))]
 
 /// Internal, not for public consumption
 #[doc(hidden)]
