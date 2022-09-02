@@ -69,7 +69,7 @@
 //!
 //! Encryption is powered by [`magic_crypt`] using AES-256 encryption.
 //!
-//! Inspired by [`litcrypt`]
+//! Inspired by [`litcrypt`](https://docs.rs/crate/litcrypt/0.3.0)
 
 #[doc(hidden)]
 pub mod __internal {
