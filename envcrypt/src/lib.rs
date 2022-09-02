@@ -6,6 +6,10 @@
 //! While it's still possible to reverse-engineer the values, `envcrypt` prevents
 //! `strings <my-binary>` from trivially finding embedded secrets.
 //!
+//! Since the secret must be decrypted at runtime,
+//! `envc!` returns an owned [`String`] instead of `&'static str`.
+//! Its API otherwise mirrors [`env!`] and [`option_env!`].
+//!
 //! # Usage
 //!
 //! As a replacement for [`env!`]
