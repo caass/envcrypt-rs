@@ -3,6 +3,8 @@ description = "internal"
 edition     = "2021"
 license     = "MIT OR Apache-2.0"
 name        = "envcrypt-macro"
+publish     = true
+release     = false
 version     = "0.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
