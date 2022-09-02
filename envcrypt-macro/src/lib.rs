@@ -31,35 +31,6 @@ macro_rules! syntax_error {
 #[allow(missing_docs)] // documented in main crate
 #[proc_macro_error]
 #[proc_macro]
-pub fn option_envc(tokens: TokenStream) -> TokenStream {
-    let env_var_key = match parse(tokens, "option_envc") {
-        Input::VariableName(variable_name) => variable_name,
-        Input::VariableNameAndAbortMessage { .. } => abort_call_site!(
-            "Invalid syntax. Expected input of the form `option_envc!(\"VAR_NAME\")`"
-        ),
-    };
-
-    match env::var(&env_var_key) {
-        Ok(variable) => {
-            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
-            quote!(::std::option::Option::Some({ ::envcrypt::__internal::decrypt(#key, #iv, #encrypted) }))
-        }
-
-        Err(VarError::NotUnicode(_)) => {
-            abort_call_site!(
-                "Environment variable ${} contains non-unicode value",
-                &env_var_key
-            )
-        }
-
-        Err(VarError::NotPresent) => quote!(::std::option::Option::<String>::None),
-    }
-    .into()
-}
-
-#[allow(missing_docs)] // documented in main crate
-#[proc_macro_error]
-#[proc_macro]
 pub fn envc(tokens: TokenStream) -> TokenStream {
     let (env_var_key, abort_message) = match parse(tokens, "envc") {
         Input::VariableName(variable_name) => (
@@ -86,6 +57,35 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
         }
 
         Err(VarError::NotPresent) => abort_call_site!("{}", abort_message),
+    }
+    .into()
+}
+
+#[allow(missing_docs)] // documented in main crate
+#[proc_macro_error]
+#[proc_macro]
+pub fn option_envc(tokens: TokenStream) -> TokenStream {
+    let env_var_key = match parse(tokens, "option_envc") {
+        Input::VariableName(variable_name) => variable_name,
+        Input::VariableNameAndAbortMessage { .. } => abort_call_site!(
+            "Invalid syntax. Expected input of the form `option_envc!(\"VAR_NAME\")`"
+        ),
+    };
+
+    match env::var(&env_var_key) {
+        Ok(variable) => {
+            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
+            quote!(::std::option::Option::Some({ ::envcrypt::__internal::decrypt(#key, #iv, #encrypted) }))
+        }
+
+        Err(VarError::NotUnicode(_)) => {
+            abort_call_site!(
+                "Environment variable ${} contains non-unicode value",
+                &env_var_key
+            )
+        }
+
+        Err(VarError::NotPresent) => quote!(::std::option::Option::<String>::None),
     }
     .into()
 }
@@ -171,8 +171,8 @@ fn encrypt(variable: String) -> EncryptedVariable {
     let encrypted = magic.encrypt_str_to_bytes(variable);
 
     EncryptedVariable {
-        key: Literal::string(&key),
-        iv: Literal::string(&iv),
+        key: Literal::byte_string(key.as_bytes()),
+        iv: Literal::byte_string(iv.as_bytes()),
         encrypted: Literal::byte_string(&encrypted),
     }
 }

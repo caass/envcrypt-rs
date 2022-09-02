@@ -14,7 +14,9 @@ instead of `&'static str`. Its API otherwise mirrors [`env!`](https://doc.rust-l
 
 ## Usage
 
-As a replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
+The [`envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.envc.html) and [`option_envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.option_envc.html) macros can be used as drop-in replacements for [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html), respectively.
+
+### As a replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
 
 ```rust
 use envcrypt::envc;
@@ -23,7 +25,7 @@ let my_super_secret_key: String = envc!("SECRET_KEY");
 // ...do stuff with your secret key
 ```
 
-As a replacement for [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html)
+### As a replacement for [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html)
 
 ```rust
 use envcrypt::option_envc;
@@ -33,7 +35,7 @@ if let Some(optional_value) = option_envc!("OPTIONAL_SECRET_KEY") {
 }
 ```
 
-With [`dotenvy`](https://crates.io/crates/dotenvy):
+### With [`dotenvy`](https://crates.io/crates/dotenvy):
 
 `.env`:
 
@@ -68,7 +70,7 @@ let client_secret: String = envc!("CLIENT_SECRET");
 
 ## Details
 
-Encryption is powered by [`magic_crypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption.
+Encryption is powered by [`magic_crypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption. `envcrypt` encrypts an environment variable, and then embeds the encrypted variable along with the encryption key and initialization vector in your binary at runtime.
 
 Inspired by [`litcrypt`](https://crates.io/crates/litcrypt).
 

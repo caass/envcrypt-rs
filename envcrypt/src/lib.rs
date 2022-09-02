@@ -64,20 +64,22 @@
 //!
 //! let client_secret: String = envc!("CLIENT_SECRET");
 //! ```
-//!
-//! # Details
-//!
-//! Encryption is powered by [`magic_crypt`] using AES-256 encryption.
-//!
-//! Inspired by [`litcrypt`](https://docs.rs/crate/litcrypt/0.3.0)
 
+/// Internal, not for public consumption
 #[doc(hidden)]
 pub mod __internal {
+    use std::str::from_utf8;
+
     use magic_crypt::{MagicCrypt256, MagicCryptTrait};
 
-    pub fn decrypt(key: &str, iv: &str, encrypted_value: &[u8]) -> String {
-        let magic = MagicCrypt256::new(key, Some(iv));
+    /// Decrypt
+    pub fn decrypt(key: &[u8], iv: &[u8], encrypted_value: &[u8]) -> String {
+        let key_str = from_utf8(key).unwrap();
+        let iv_str = from_utf8(iv).unwrap();
+
+        let magic = MagicCrypt256::new(key_str, Some(iv_str));
         let decrypted = magic.decrypt_bytes_to_bytes(encrypted_value).unwrap();
+
         String::from_utf8(decrypted).unwrap()
     }
 }
