@@ -1,2 +1,7 @@
 [workspace]
 members = ["envcrypt", "envcrypt-macro", "envcrypt-test"]
+
+[workspace.metadata.release]
+consolidate-commits = true
+consolidate-pushes  = true
+shared-version      = true

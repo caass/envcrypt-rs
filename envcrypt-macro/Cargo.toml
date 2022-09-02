@@ -5,7 +5,9 @@ license     = "MIT OR Apache-2.0"
 name        = "envcrypt-macro"
 version     = "0.2.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.release]
+shared-version = true
+tag            = false
 
 [lib]
 path       = "src/lib.rs"
