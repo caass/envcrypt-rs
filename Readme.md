@@ -72,6 +72,37 @@ let client_secret: String = envc!("CLIENT_SECRET");
 
 Encryption is powered by [`magic_crypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption. `envcrypt` encrypts an environment variable, and then embeds the encrypted variable along with the encryption key and initialization vector in your binary at runtime.
 
-Inspired by [`litcrypt`](https://crates.io/crates/litcrypt).
+You can check for yourself that your secrets are not visible in the binary by running `strings` on the compiled output:
+
+```text
+$ cat envcrypt-test/src/main.rs
+
+use envcrypt::envc;
+
+fn main() {
+    println!("{}", envc!("ENCRYPTED_KEY"));
+    println!("{}", env!("NAKED_KEY"));
+}
+
+$ cat envcrypt-test/build.rs
+
+fn main() {
+    println!("cargo:rustc-env=ENCRYPTED_KEY=ENCRYPTED_VALUE");
+    println!("cargo:rustc-env=NAKED_KEY=NAKED_VALUE");
+}
+
+$ cargo build -p envcrypt-test
+   Compiling envcrypt v0.2.0 (path/to/envcrypt)
+   Compiling envcrypt-test v0.0.0 (path/to/envcrypt/envcrypt-test)
+    Finished dev [unoptimized + debuginfo] target(s) in 1.73s
+
+
+$ strings - target/debug/envcrypt-test | rg VALUE
+NAKED_VALUE
+```
+
+Here are instructions for running `strings` yourself on [MacOS](https://www.unix.com/man-page/osx/1/strings/), [Linux](https://linux.die.net/man/1/strings), and [Windows](https://docs.microsoft.com/en-us/sysinternals/downloads/strings).
+
+Inspired by [`litcrypt`](https://crates.io/crates/litcrypt), which I would have used except I want to open-source my code.
 
 Dual-Licensed under MIT or APACHE-2.0.
