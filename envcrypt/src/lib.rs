@@ -2,35 +2,25 @@
 #![cfg_attr(windows, doc = include_str!("..\\README.md"))]
 #![cfg_attr(not(windows), doc = include_str!("../README.md"))]
 
-/// Internal, not for public consumption
+mod decrypt;
+
+/// For internal use only.
 #[doc(hidden)]
 pub mod __internal {
-    use magic_crypt::{MagicCrypt256, MagicCryptTrait};
-    use std::str;
-
-    /// This should line up exactly with the logic used to encrypt
-    /// in `envcrypt-macro`
-    pub fn decrypt(key: &[u8], iv: &[u8], encrypted_value: &[u8]) -> String {
-        let key_str = str::from_utf8(key).unwrap();
-        let iv_str = str::from_utf8(iv).unwrap();
-
-        let magic = MagicCrypt256::new(key_str, Some(iv_str));
-        let decrypted = magic.decrypt_bytes_to_bytes(encrypted_value).unwrap();
-
-        String::from_utf8(decrypted).unwrap()
-    }
+    #[doc(hidden)]
+    pub use super::decrypt::decrypt;
 }
 
 /// Inspects and encrypts an environment variable at compile time
 /// and decrypts at runtime.
 ///
 /// This macro will expand to the value of the named environment variable at compile time,
-/// yielding an expression of type `String`.
+/// yielding an expression of type `&'static str`.
 /// Use [`std::env::var`] instead if you want to read the value at runtime.
 ///
 /// ```rust
 /// # use envcrypt::envc;
-/// let path: String = envc!("PATH");
+/// let path: &'static str = envc!("PATH");
 /// println!("the $PATH variable at the time of compiling was: {path}");
 /// ```
 ///
@@ -39,7 +29,7 @@ pub mod __internal {
 ///
 /// ```compile_fail
 /// # use envcrypt::envc;
-/// let unlikely_variable: String = envc!("HIGHLY_UNLIKELY_ENVIRONMENT_VARIABLE");
+/// let unlikely_variable: &'static str = envc!("HIGHLY_UNLIKELY_ENVIRONMENT_VARIABLE");
 /// ```
 #[doc(inline)]
 pub use envcrypt_macro::envc;
@@ -48,7 +38,7 @@ pub use envcrypt_macro::envc;
 /// and decrypts at runtime.
 ///
 /// If the named environment variable is present at compile time,
-/// this will expand into an expression of type `Option<String>`
+/// this will expand into an expression of type `Option<&'static str>`
 /// whose value is `Some` of the value of the environment variable.
 /// If the environment variable is not present, then this will expand to `None`.
 ///
@@ -59,7 +49,7 @@ pub use envcrypt_macro::envc;
 ///
 /// ```rust
 /// # use envcrypt::option_envc;
-/// let key: Option<String> = option_envc!("SECRET_KEY");
+/// let key: Option<&'static str> = option_envc!("SECRET_KEY");
 /// println!("the secret key might be: {key:?}");
 /// ```
 #[doc(inline)]

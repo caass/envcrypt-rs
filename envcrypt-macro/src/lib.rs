@@ -1,19 +1,17 @@
 #![deny(missing_docs, clippy::missing_docs_in_private_items)]
-
-//! Do not use this crate directly, it will not work.
-//! Use [`envcrypt`](https://crates.io/crate/envcrypt) instead.
+#![cfg_attr(windows, doc = include_str!("..\\README.md"))]
+#![cfg_attr(not(windows), doc = include_str!("../README.md"))]
 
 use std::env::{self, VarError};
 
-use magic_crypt::{MagicCrypt256, MagicCryptTrait};
-use proc_macro::{TokenStream, TokenTree};
-use proc_macro2::Literal;
+use proc_macro::{Literal, TokenStream, TokenTree};
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
-use rand::{
-    distributions::{DistString, Standard},
-    rngs::OsRng,
-};
+
+mod decrypt;
+mod encrypt;
+use decrypt::{decrypt, decrypt_none, decrypt_some};
+use encrypt::{encrypt, EncryptedVariable};
 
 /// Shortcut for aborting due to a syntax error.
 macro_rules! syntax_error {
@@ -28,7 +26,7 @@ macro_rules! syntax_error {
     };
 }
 
-#[allow(missing_docs)] // documented in main crate
+#[doc(hidden)]
 #[proc_macro_error]
 #[proc_macro]
 pub fn envc(tokens: TokenStream) -> TokenStream {
@@ -44,9 +42,9 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
     };
 
     match env::var(&env_var_key) {
-        Ok(variable) => {
-            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
-            quote!({ envcrypt::__internal::decrypt(#key, #iv, #encrypted) })
+        Ok(unencrypted_variable) => {
+            let EncryptedVariable { key, value, nonce } = encrypt(unencrypted_variable);
+            decrypt!(key, value, nonce)
         }
 
         Err(VarError::NotUnicode(_)) => {
@@ -61,7 +59,7 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
     .into()
 }
 
-#[allow(missing_docs)] // documented in main crate
+#[doc(hidden)]
 #[proc_macro_error]
 #[proc_macro]
 pub fn option_envc(tokens: TokenStream) -> TokenStream {
@@ -73,9 +71,9 @@ pub fn option_envc(tokens: TokenStream) -> TokenStream {
     };
 
     match env::var(&env_var_key) {
-        Ok(variable) => {
-            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
-            quote!(::std::option::Option::Some({ ::envcrypt::__internal::decrypt(#key, #iv, #encrypted) }))
+        Ok(unencrypted_variable) => {
+            let EncryptedVariable { key, value, nonce } = encrypt(unencrypted_variable);
+            decrypt_some!(key, value, nonce)
         }
 
         Err(VarError::NotUnicode(_)) => {
@@ -85,14 +83,14 @@ pub fn option_envc(tokens: TokenStream) -> TokenStream {
             )
         }
 
-        Err(VarError::NotPresent) => quote!(::std::option::Option::<String>::None),
+        Err(VarError::NotPresent) => decrypt_none!(),
     }
     .into()
 }
 
 /// Returns `Some(value)` if the provided literal was a string literal,
 /// or `None` otherwise.
-fn stringify(literal: &proc_macro::Literal) -> Option<String> {
+fn stringify(literal: &Literal) -> Option<String> {
     let stringified = literal.to_string();
     if stringified.starts_with('"') && stringified.ends_with('"') {
         Some(stringified[1..stringified.len() - 1].to_owned())
@@ -147,32 +145,5 @@ fn parse(tokens: TokenStream, macro_name: &str) -> Input {
             }
         }
         _ => syntax_error!(macro_name),
-    }
-}
-
-/// Represents an encrypted environment variable
-struct EncryptedVariable {
-    /// The encryption key that was used to encrypt the variable
-    key: Literal,
-
-    /// The initialization vector that was used to encrypt the variable
-    iv: Literal,
-
-    /// The encrypted value of the variable
-    encrypted: Literal,
-}
-
-/// Encrypts an environment variable
-fn encrypt(variable: String) -> EncryptedVariable {
-    let key = Standard.sample_string(&mut OsRng, 256);
-    let iv = Standard.sample_string(&mut OsRng, 256);
-
-    let magic = MagicCrypt256::new(&key, Some(&iv));
-    let encrypted = magic.encrypt_str_to_bytes(variable);
-
-    EncryptedVariable {
-        key: Literal::byte_string(key.as_bytes()),
-        iv: Literal::byte_string(iv.as_bytes()),
-        encrypted: Literal::byte_string(&encrypted),
     }
 }

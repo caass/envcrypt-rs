@@ -5,12 +5,8 @@
 Drop-in replacements for [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html)
 that encrypt your variables at compile-time and decrypt them at runtime.
 
-While it's still possible to reverse-engineer the values, `envcrypt` prevents
-`strings <my-binary>` from trivially finding embedded secrets.
-
-Since the secret must be decrypted at runtime,
-[`envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.envc.html) and [`option_envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.option_envc.html) return an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
-instead of `&'static str`. The API otherwise mirrors [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html).
+While it's still possible to reverse-engineer the values, `envcrypt` prevents `strings <my-binary>` from trivially finding embedded secrets.
+See [details](#details) for more information.
 
 ## Usage
 
@@ -21,7 +17,7 @@ The [`envc!`](https://docs.rs/envcrypt/latest/envcrypt/macro.envc.html) and [`op
 ```rust
 use envcrypt::envc;
 
-let my_super_secret_key: String = envc!("SECRET_KEY");
+let my_super_secret_key: &'static str = envc!("SECRET_KEY");
 // ...do stuff with your secret key
 ```
 
@@ -65,12 +61,14 @@ fn main(){
 ```rust
 use envcrypt::envc;
 
-let client_secret: String = envc!("CLIENT_SECRET");
+let client_secret: &'static str = envc!("CLIENT_SECRET");
 ```
 
 ## Details
 
-Encryption is powered by [`magic_crypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption. `envcrypt` encrypts an environment variable, and then embeds the encrypted variable along with the encryption key and initialization vector in your binary at runtime.
+Encryption is powered by [`RustCrypto`](https://github.com/RustCrypto/AEADs/tree/master/chacha20poly1305) using [ChaCha20Poly1305](https://tools.ietf.org/html/rfc8439) encryption. While this is a secure algorithm, it is used in a highly insecure way, which makes it unsuitable for secrets requiring real cryptographic security. `envcrypt` works encrypting an environment variable at compile time and then embedding the encrypted variable along with the encryption key in your binary. This means that an intrepid hacker can still decrypt your secrets, but it's not as trivial as running `strings`.
+
+An analogy is that instead of leaving your front door open (embedding naked strings in your binary), you close and lock the door and put the key under the mat (embedding the encryption key). A criminal can still break in to your house, but simply having the door closed and locked will be enough to deter most people.
 
 You can check for yourself that your secrets are not visible in the binary by running `strings` on the compiled output:
 
@@ -102,5 +100,3 @@ NAKED_VALUE
 ```
 
 Here are instructions for running `strings` yourself on [MacOS](https://www.unix.com/man-page/osx/1/strings/), [Linux](https://linux.die.net/man/1/strings), and [Windows](https://docs.microsoft.com/en-us/sysinternals/downloads/strings).
-
-Inspired by [`litcrypt`](https://crates.io/crates/litcrypt), which I would have used except I want to open-source my code.
