@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
 name: CI
-on: push
+on: [push, pull_request]
 jobs:
   build-and-test:
     name: Build and Test
@@ -33,7 +33,7 @@ jobs:
           args: ${{ matrix.mode }} --verbose
   lint:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Clippy
     steps:
       - uses: actions/checkout@v2
         name: Checkout Repo
@@ -41,3 +41,11 @@ jobs:
         name: Run Clippy
         with:
           command: clippy
+  cargo-deny:
+    runs-on: ubuntu-latest
+    name: Cargo Deny
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout Repo
+      - uses: EmbarkStudios/cargo-deny-action@v1
+        name: Run cargo-deny
