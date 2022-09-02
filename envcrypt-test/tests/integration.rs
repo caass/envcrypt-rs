@@ -1,27 +1,21 @@
-use std::{
-    io,
-    process::{Command, Output},
-};
+use std::process::Output;
 
-fn run_binary() -> io::Result<Output> {
-    Command::new(env!("CARGO_BIN_EXE_envcrypt-test"))
-        .env("RUST_BACKTRACE", "1")
-        .output()
-}
+mod util;
+use util::{include_binary_bytes, run_binary};
 
-macro_rules! binary_bytes {
-    () => {
-        include_bytes!(env!("CARGO_BIN_EXE_envcrypt-test"))
-    };
+#[test]
+fn error_messages_match_std_macros() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/fixtures/error-message*.rs")
 }
 
 #[test]
-fn check_binary() {
+fn encrypted_variables_are_decrypted_at_runtime() {
     let Output {
         status,
         stderr,
         stdout,
-    } = run_binary().expect("Failed to execute test binary!");
+    } = run_binary();
 
     let stderr = String::from_utf8_lossy(&stderr);
     let stdout = String::from_utf8_lossy(&stdout);
@@ -39,8 +33,11 @@ fn check_binary() {
         stdout.contains("NAKED_VALUE"),
         "Test binary failed.\nstderr dump:\n{stderr}"
     );
+}
 
-    let binary_text = String::from_utf8_lossy(binary_bytes!());
+#[test]
+fn encrypted_variables_are_encrypted_at_compile_time() {
+    let binary_text = String::from_utf8_lossy(include_binary_bytes!());
 
     assert!(!binary_text.contains("ENCRYPTED_VALUE"));
     assert!(binary_text.contains("NAKED_VALUE"));
