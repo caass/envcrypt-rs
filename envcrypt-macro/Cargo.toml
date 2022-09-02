@@ -3,6 +3,7 @@ description = "internal"
 edition     = "2021"
 license     = "MIT OR Apache-2.0"
 name        = "envcrypt-macro"
+repository  = "https://github.com/caass/envcrypt-rs"
 version     = "0.2.0"
 
 [package.metadata.release]
