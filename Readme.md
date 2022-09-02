@@ -12,7 +12,7 @@ Since the secret must be decrypted at runtime,
 `envcrypt!` returns an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
 instead of an string literal. Its API otherwise mirrors [`env!`](https://doc.rust-lang.org/std/macro.env.html) and [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html).
 
-# Usage
+## Usage
 
 As a replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
 
@@ -66,7 +66,7 @@ use envcrypt::envcrypt;
 let client_secret: String = envcrypt!("CLIENT_SECRET");
 ```
 
-# Details
+## Details
 
 Encryption is powered by [`magic_crypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption.
 
