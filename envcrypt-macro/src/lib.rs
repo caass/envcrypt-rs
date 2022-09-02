@@ -1,4 +1,9 @@
-use std::env;
+#![deny(missing_docs, clippy::missing_docs_in_private_items)]
+
+//! Do not use this crate directly, it will not work.
+//! Use [`envcrypt`](https://crates.io/crate/envcrypt) instead.
+
+use std::env::{self, VarError};
 
 use magic_crypt::{MagicCrypt256, MagicCryptTrait};
 use proc_macro::{TokenStream, TokenTree};
@@ -10,27 +15,154 @@ use rand::{
     rngs::OsRng,
 };
 
+/// Shortcut for aborting due to a syntax error.
+macro_rules! syntax_error {
+    ($macro_name:ident) => {
+        match $macro_name {
+            "envcrypt" => abort_call_site!("Invalid syntax. Valid forms are `envcrypt!(\"VAR_NAME\")` and `envcrypt!(\"VAR_NAME\", \"custom error message\")`."),
+
+            "option_envcrypt" => abort_call_site!("Invalid syntax. Expected input of the form `option_envcrypt!(\"VAR_NAME\")`"),
+
+            _ => panic!("Unknown macro name")
+        }
+    };
+}
+
+#[allow(missing_docs)] // documented in main crate
 #[proc_macro_error]
 #[proc_macro]
-pub fn envcrypt(tokens: TokenStream) -> TokenStream {
-    let variable = get_variable(tokens);
+pub fn option_envcrypt(tokens: TokenStream) -> TokenStream {
+    let env_var_key = match parse(tokens, "option_envcrypt") {
+        Input::VariableName(variable_name) => variable_name,
+        Input::VariableNameAndAbortMessage { .. } => abort_call_site!(
+            "Invalid syntax. Expected input of the form `option_envcrypt!(\"VAR_NAME\")`"
+        ),
+    };
 
-    let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
-
-    quote! {
-        {
-            envcrypt::__internal::decrypt(#key, #iv, #encrypted)
+    match env::var(&env_var_key) {
+        Ok(variable) => {
+            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
+            quote!(::std::option::Option::Some({ ::envcrypt::__internal::decrypt(#key, #iv, #encrypted) }))
         }
+
+        Err(VarError::NotUnicode(_)) => {
+            abort_call_site!(
+                "Environment variable ${} contains non-unicode value",
+                &env_var_key
+            )
+        }
+
+        Err(VarError::NotPresent) => quote!(::std::option::Option::<String>::None),
     }
     .into()
 }
 
+#[allow(missing_docs)] // documented in main crate
+#[proc_macro_error]
+#[proc_macro]
+pub fn envcrypt(tokens: TokenStream) -> TokenStream {
+    let (env_var_key, abort_message) = match parse(tokens, "envcrypt") {
+        Input::VariableName(variable_name) => (
+            variable_name.clone(),
+            format!("environment variable `{}` not defined", &variable_name),
+        ),
+        Input::VariableNameAndAbortMessage {
+            variable_name,
+            abort_message,
+        } => (variable_name, abort_message),
+    };
+
+    match env::var(&env_var_key) {
+        Ok(variable) => {
+            let EncryptedVariable { key, iv, encrypted } = encrypt(variable);
+            quote!({ envcrypt::__internal::decrypt(#key, #iv, #encrypted) })
+        }
+
+        Err(VarError::NotUnicode(_)) => {
+            abort_call_site!(
+                "Environment variable ${} contains non-unicode value",
+                &env_var_key
+            )
+        }
+
+        Err(VarError::NotPresent) => abort_call_site!("{}", abort_message),
+    }
+    .into()
+}
+
+/// Returns `Some(value)` if the provided literal was a string literal,
+/// or `None` otherwise.
+fn stringify(literal: &proc_macro::Literal) -> Option<String> {
+    let stringified = literal.to_string();
+    if stringified.starts_with('"') && stringified.ends_with('"') {
+        Some(stringified[1..stringified.len() - 1].to_owned())
+    } else {
+        None
+    }
+}
+
+/// Possible inputs to the [`envcrypt!`] and [`option_envcrypt!`] macros.
+enum Input {
+    /// A variable to inspect at compile time
+    VariableName(String),
+
+    /// A variable to inspect at compile time and a custom abort message if it's missing
+    VariableNameAndAbortMessage {
+        /// The variable to inspect
+        variable_name: String,
+
+        /// The message to display if the variable is missing
+        abort_message: String,
+    },
+}
+
+/// Parses a [`TokenStream`] into [`Input`]
+fn parse(tokens: TokenStream, macro_name: &str) -> Input {
+    let tokens_vec = tokens.into_iter().collect::<Vec<_>>();
+
+    match *tokens_vec.as_slice() {
+        // `envcrypt!("MY_VAR")`
+        [TokenTree::Literal(ref variable_literal)] => {
+            if let Some(variable) = stringify(variable_literal) {
+                Input::VariableName(variable)
+            } else {
+                syntax_error!(macro_name)
+            }
+        }
+
+        // `envcrypt!("MY_VAR", "custom error message")
+        [TokenTree::Literal(ref variable_literal), TokenTree::Punct(ref comma), TokenTree::Literal(ref message_literal)] => {
+            match (
+                stringify(variable_literal),
+                comma.as_char(),
+                stringify(message_literal),
+            ) {
+                (Some(variable_name), ',', Some(abort_message)) => {
+                    Input::VariableNameAndAbortMessage {
+                        variable_name,
+                        abort_message,
+                    }
+                }
+                _ => syntax_error!(macro_name),
+            }
+        }
+        _ => syntax_error!(macro_name),
+    }
+}
+
+/// Represents an encrypted environment variable
 struct EncryptedVariable {
+    /// The encryption key that was used to encrypt the variable
     key: Literal,
+
+    /// The initialization vector that was used to encrypt the variable
     iv: Literal,
+
+    /// The encrypted value of the variable
     encrypted: Literal,
 }
 
+/// Encrypts an environment variable
 fn encrypt(variable: String) -> EncryptedVariable {
     let key = Standard.sample_string(&mut OsRng, 256);
     let iv = Standard.sample_string(&mut OsRng, 256);
@@ -42,39 +174,5 @@ fn encrypt(variable: String) -> EncryptedVariable {
         key: Literal::string(&key),
         iv: Literal::string(&iv),
         encrypted: Literal::byte_string(&encrypted),
-    }
-}
-
-macro_rules! syntax_error {
-    () => {
-        abort_call_site!("Invalid syntax. Valid forms are `envcrypt!(\"KEY\")` and `envcrypt!(\"KEY\", \"error message\")`")
-    };
-}
-
-fn get_variable(tokens: TokenStream) -> String {
-    let mut iter = tokens.into_iter();
-
-    let key = if let Some(TokenTree::Literal(literal)) = iter.next() {
-        let with_quotes = literal.to_string();
-        with_quotes[1..with_quotes.len() - 1].to_owned()
-    } else {
-        syntax_error!()
-    };
-
-    let abort_call_site_message = match (iter.next(), iter.next(), iter.next()) {
-        (Some(TokenTree::Punct(comma)), Some(TokenTree::Literal(message)), None)
-            if comma.as_char() == ',' =>
-        {
-            let with_quotes = message.to_string();
-            with_quotes[1..with_quotes.len() - 1].to_owned()
-        }
-        (None, None, None) => format!("environment variable `{}` not defined", &key),
-        _ => syntax_error!(),
-    };
-
-    if let Ok(var) = env::var(&key) {
-        var
-    } else {
-        abort_call_site!("{}", abort_call_site_message)
     }
 }

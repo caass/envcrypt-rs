@@ -1,21 +1,37 @@
 # envcrypt
 
-Drop-in replacement for [`env!`](https://doc.rust-lang.org/std/macro.env.html)
-that encrypts your variables at compile-time and decrypts them at runtime,
-preventing naughty folks from snooping your binary for secrets or credentials.
+Drop-in replacements for [`env!`] and [`option_env!`]
+that encrypt your variables at compile-time and decrypt them at runtime.
 
-### Usage
+While it's still possible to reverse-engineer the values, `envcrypt` prevents
+`strings <my-binary>` from trivially finding embedded secrets.
+
+Since the secret must be decrypted at runtime,
+`envcrypt!` returns an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
+instead of an string literal. Its API otherwise mirrors [`env!`] and [`option_env!`].
+
+## Usage
+
+As a replacement for [`env!`]
 
 ```rust
 use envcrypt::envcrypt;
 
-fn main() {
-  let my_super_secret_key = envcrypt!("SECRET_KEY");
-  // do stuff with your secret key
+let my_super_secret_key: String = envcrypt!("SECRET_KEY");
+// ...do stuff with your secret key
+```
+
+As a replacement for [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html)
+
+```rust
+use envcrypt::option_envcrypt;
+
+if let Some(optional_value) = option_envcrypt!("OPTIONAL_SECRET_KEY") {
+  // ...do stuff
 }
 ```
 
-With [`dotenv`](https://crates.io/crates/dotenv):
+With [`dotenvy`](https://crates.io/crates/dotenvy):
 
 `.env`:
 
@@ -27,12 +43,16 @@ SOME_TOKEN="some_token"
 `build.rs`:
 
 ```rust
-fn main() {
-  println!("cargo:rerun-if-changed=.env");
+use dotenvy::dotenv_iter;
 
-  for (key, value) in dotenv::vars() {
-    println!("cargo:rustc-env=${key}=${value}");
-  }
+fn main(){
+ println!("cargo:rerun-if-changed=.env");
+
+ for item in dotenv_iter().unwrap() {
+   let (key, value) = item.unwrap();
+   println!("cargo:rustc-env=${key}=${value}");
+ }
+
 }
 ```
 
@@ -41,13 +61,13 @@ fn main() {
 ```rust
 use envcrypt::envcrypt;
 
-fn main() {
-  let client_secret = envcrypt!("CLIENT_SECRET");
-}
+let client_secret: String = envcrypt!("CLIENT_SECRET");
 ```
 
-### Details
+## Details
 
-Encryption is powered by [`MagicCrypt`](https://crates.io/crates/magic-crypt) using AES-256 encryption.
+Encryption is powered by [`magic_crypt`] using AES-256 encryption.
+
+Inspired by [`litcrypt`]
 
 License: MIT OR Apache-2.0

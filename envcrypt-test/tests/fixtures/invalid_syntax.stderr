@@ -1,4 +1,4 @@
-error: Invalid syntax. Valid forms are `envcrypt!("KEY")` and `envcrypt!("KEY", "error message")`
+error: Invalid syntax. Valid forms are `envcrypt!("VAR_NAME")` and `envcrypt!("VAR_NAME", "custom error message")`.
  --> tests/fixtures/invalid_syntax.rs:4:5
   |
 4 |     envcrypt!("this" => "is", wrong)
