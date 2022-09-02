@@ -19,9 +19,9 @@ use rand::{
 macro_rules! syntax_error {
     ($macro_name:ident) => {
         match $macro_name {
-            "envcrypt" => abort_call_site!("Invalid syntax. Valid forms are `envcrypt!(\"VAR_NAME\")` and `envcrypt!(\"VAR_NAME\", \"custom error message\")`."),
+            "envc" => abort_call_site!("Invalid syntax. Valid forms are `envc!(\"VAR_NAME\")` and `envc!(\"VAR_NAME\", \"custom error message\")`."),
 
-            "option_envcrypt" => abort_call_site!("Invalid syntax. Expected input of the form `option_envcrypt!(\"VAR_NAME\")`"),
+            "option_envc" => abort_call_site!("Invalid syntax. Expected input of the form `option_envc!(\"VAR_NAME\")`"),
 
             _ => panic!("Unknown macro name")
         }
@@ -31,11 +31,11 @@ macro_rules! syntax_error {
 #[allow(missing_docs)] // documented in main crate
 #[proc_macro_error]
 #[proc_macro]
-pub fn option_envcrypt(tokens: TokenStream) -> TokenStream {
-    let env_var_key = match parse(tokens, "option_envcrypt") {
+pub fn option_envc(tokens: TokenStream) -> TokenStream {
+    let env_var_key = match parse(tokens, "option_envc") {
         Input::VariableName(variable_name) => variable_name,
         Input::VariableNameAndAbortMessage { .. } => abort_call_site!(
-            "Invalid syntax. Expected input of the form `option_envcrypt!(\"VAR_NAME\")`"
+            "Invalid syntax. Expected input of the form `option_envc!(\"VAR_NAME\")`"
         ),
     };
 
@@ -60,8 +60,8 @@ pub fn option_envcrypt(tokens: TokenStream) -> TokenStream {
 #[allow(missing_docs)] // documented in main crate
 #[proc_macro_error]
 #[proc_macro]
-pub fn envcrypt(tokens: TokenStream) -> TokenStream {
-    let (env_var_key, abort_message) = match parse(tokens, "envcrypt") {
+pub fn envc(tokens: TokenStream) -> TokenStream {
+    let (env_var_key, abort_message) = match parse(tokens, "envc") {
         Input::VariableName(variable_name) => (
             variable_name.clone(),
             format!("environment variable `{}` not defined", &variable_name),
@@ -101,7 +101,7 @@ fn stringify(literal: &proc_macro::Literal) -> Option<String> {
     }
 }
 
-/// Possible inputs to the [`envcrypt!`] and [`option_envcrypt!`] macros.
+/// Possible inputs to the [`envc!`] and [`option_envc!`] macros.
 enum Input {
     /// A variable to inspect at compile time
     VariableName(String),
@@ -121,7 +121,7 @@ fn parse(tokens: TokenStream, macro_name: &str) -> Input {
     let tokens_vec = tokens.into_iter().collect::<Vec<_>>();
 
     match *tokens_vec.as_slice() {
-        // `envcrypt!("MY_VAR")`
+        // `envc!("MY_VAR")`
         [TokenTree::Literal(ref variable_literal)] => {
             if let Some(variable) = stringify(variable_literal) {
                 Input::VariableName(variable)
@@ -130,7 +130,7 @@ fn parse(tokens: TokenStream, macro_name: &str) -> Input {
             }
         }
 
-        // `envcrypt!("MY_VAR", "custom error message")
+        // `envc!("MY_VAR", "custom error message")
         [TokenTree::Literal(ref variable_literal), TokenTree::Punct(ref comma), TokenTree::Literal(ref message_literal)] => {
             match (
                 stringify(variable_literal),

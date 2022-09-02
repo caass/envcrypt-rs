@@ -1,5 +1,5 @@
-use envcrypt::envcrypt;
+use envcrypt::envc;
 
 fn main() {
-    envcrypt!("MISSING")
+    envc!("MISSING")
 }

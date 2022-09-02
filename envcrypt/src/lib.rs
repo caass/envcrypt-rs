@@ -6,27 +6,23 @@
 //! While it's still possible to reverse-engineer the values, `envcrypt` prevents
 //! `strings <my-binary>` from trivially finding embedded secrets.
 //!
-//! Since the secret must be decrypted at runtime,
-//! `envcrypt!` returns an owned [`String`](https://doc.rust-lang.org/std/string/struct.String.html)
-//! instead of an string literal. Its API otherwise mirrors [`env!`] and [`option_env!`].
-//!
 //! # Usage
 //!
 //! As a replacement for [`env!`]
 //!
 //! ```rust
-//! use envcrypt::envcrypt;
+//! use envcrypt::envc;
 //!
-//! let my_super_secret_key: String = envcrypt!("SECRET_KEY");
+//! let my_super_secret_key: String = envc!("SECRET_KEY");
 //! // ...do stuff with your secret key
 //! ```
 //!
 //! As a replacement for [`option_env!`](https://doc.rust-lang.org/std/macro.option_env.html)
 //!
 //! ```rust
-//! use envcrypt::option_envcrypt;
+//! use envcrypt::option_envc;
 //!
-//! if let Some(optional_value) = option_envcrypt!("OPTIONAL_SECRET_KEY") {
+//! if let Some(optional_value) = option_envc!("OPTIONAL_SECRET_KEY") {
 //!   // ...do stuff
 //! }
 //! ```
@@ -60,9 +56,9 @@
 //! `main.rs`:
 //!
 //! ```rust
-//! use envcrypt::envcrypt;
+//! use envcrypt::envc;
 //!
-//! let client_secret: String = envcrypt!("CLIENT_SECRET");
+//! let client_secret: String = envc!("CLIENT_SECRET");
 //! ```
 //!
 //! # Details
@@ -90,20 +86,20 @@ pub mod __internal {
 /// Use [`std::env::var`] instead if you want to read the value at runtime.
 ///
 /// ```rust
-/// # use envcrypt::envcrypt;
-/// let path: String = envcrypt!("PATH");
+/// # use envcrypt::envc;
+/// let path: String = envc!("PATH");
 /// println!("the $PATH variable at the time of compiling was: {path}");
 /// ```
 ///
 ///  If the environment variable is not defined, then a compilation error will be emitted.
-/// To not emit a compile error, use the [`option_envcrypt!`] macro instead.
+/// To not emit a compile error, use the [`option_envc!`] macro instead.
 ///
 /// ```compile_fail
-/// # use envcrypt::envcrypt;
-/// let unlikely_variable: String = envcrypt!("HIGHLY_UNLIKELY_ENVIRONMENT_VARIABLE");
+/// # use envcrypt::envc;
+/// let unlikely_variable: String = envc!("HIGHLY_UNLIKELY_ENVIRONMENT_VARIABLE");
 /// ```
 #[doc(inline)]
-pub use envcrypt_macro::envcrypt;
+pub use envcrypt_macro::envc;
 
 /// Optionally inspects and encrypts an environment variable at compile time
 /// and decrypts at runtime.
@@ -119,9 +115,9 @@ pub use envcrypt_macro::envcrypt;
 /// regardless of whether the environment variable is present or not.
 ///
 /// ```rust
-/// # use envcrypt::option_envcrypt;
-/// let key: Option<String> = option_envcrypt!("SECRET_KEY");
+/// # use envcrypt::option_envc;
+/// let key: Option<String> = option_envc!("SECRET_KEY");
 /// println!("the secret key might be: {key:?}");
 /// ```
 #[doc(inline)]
-pub use envcrypt_macro::option_envcrypt;
+pub use envcrypt_macro::option_envc;

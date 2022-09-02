@@ -1,6 +1,6 @@
-use envcrypt::envcrypt;
+use envcrypt::envc;
 
 fn main() {
-    println!("{}", envcrypt!("ENCRYPTED_KEY"));
+    println!("{}", envc!("ENCRYPTED_KEY"));
     println!("{}", env!("NAKED_KEY"));
 }

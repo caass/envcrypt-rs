@@ -1,5 +1,5 @@
-use envcrypt::envcrypt;
+use envcrypt::envc;
 
 fn main() {
-    envcrypt!("this" => "is", wrong)
+    envc!("this" => "is", wrong)
 }
