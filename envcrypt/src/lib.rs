@@ -5,14 +5,14 @@
 /// Internal, not for public consumption
 #[doc(hidden)]
 pub mod __internal {
-    use std::str::from_utf8;
-
     use magic_crypt::{MagicCrypt256, MagicCryptTrait};
+    use std::str;
 
-    /// Decrypt
+    /// This should line up exactly with the logic used to encrypt
+    /// in `envcrypt-macro`
     pub fn decrypt(key: &[u8], iv: &[u8], encrypted_value: &[u8]) -> String {
-        let key_str = from_utf8(key).unwrap();
-        let iv_str = from_utf8(iv).unwrap();
+        let key_str = str::from_utf8(key).unwrap();
+        let iv_str = str::from_utf8(iv).unwrap();
 
         let magic = MagicCrypt256::new(key_str, Some(iv_str));
         let decrypted = magic.decrypt_bytes_to_bytes(encrypted_value).unwrap();
