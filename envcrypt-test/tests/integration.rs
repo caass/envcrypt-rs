@@ -1,3 +1,4 @@
+use regex::bytes::Regex;
 use std::process::Output;
 
 mod util;
@@ -37,8 +38,10 @@ fn encrypted_variables_are_decrypted_at_runtime() {
 
 #[test]
 fn encrypted_variables_are_encrypted_at_compile_time() {
-    let binary_text = String::from_utf8_lossy(include_binary_bytes!());
+    let binary_bytes = include_binary_bytes!();
+    let encryped_value = Regex::new("ENCRYPTED_VALUE").unwrap();
+    let naked_value = Regex::new("NAKED_VALUE").unwrap();
 
-    assert!(!binary_text.contains("ENCRYPTED_VALUE"));
-    assert!(binary_text.contains("NAKED_VALUE"));
+    assert!(!encryped_value.is_match(binary_bytes));
+    assert!(naked_value.is_match(binary_bytes));
 }

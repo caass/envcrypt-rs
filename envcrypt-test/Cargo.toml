@@ -14,4 +14,5 @@ release = false
 envcrypt = { path = "../envcrypt" }
 
 [dev-dependencies]
+regex    = "1.6.0"
 trybuild = "1.0.64"
