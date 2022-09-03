@@ -6,7 +6,7 @@ use util::{include_binary_bytes, run_binary};
 #[test]
 fn error_messages_match_std_macros() {
     let t = trybuild::TestCases::new();
-    t.compile_fail("tests/fixtures/error-message*.rs")
+    t.compile_fail("tests/fixtures/*.rs")
 }
 
 #[test]
