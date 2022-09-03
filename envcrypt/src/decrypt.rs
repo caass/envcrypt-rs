@@ -6,10 +6,10 @@ use chacha20poly1305::{
 };
 
 /// Decrypts some bytes from a given key and nonce using exactly the same
-/// logic as [`envc!`] and [`option_envc!`].
+/// logic as [`envc!`](crate::envc) and [`option_envc!`](crate::option_envc).
 ///
 /// DO NOT CALL THIS FUNCTION YOURSELF. Decryption is handled automatically
-/// by the [`envc!`] and [`option_envc!`] macros at runtime.
+/// by the [`envc!`](crate::envc) and [`option_envc!`](crate::option_envc) macros at runtime.
 pub fn decrypt(data: &[u8]) -> &'static str {
     let key = Key::from_slice(&data[..32]);
     let nonce = Nonce::from_slice(&data[32..44]);

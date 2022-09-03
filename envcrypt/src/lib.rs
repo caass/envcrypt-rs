@@ -2,6 +2,16 @@
 #![cfg_attr(windows, doc = include_str!("..\\README.md"))]
 #![cfg_attr(not(windows), doc = include_str!("../README.md"))]
 
+#[doc(hidden)]
+mod decrypt;
+
+/// For internal use only.
+#[doc(hidden)]
+pub mod __internal {
+    #[doc(hidden)]
+    pub use super::decrypt::decrypt;
+}
+
 /// Inspects and encrypts an environment variable at compile time
 /// and decrypts at runtime.
 ///
@@ -45,13 +55,3 @@ pub use envcrypt_macro::envc;
 /// ```
 #[doc(inline)]
 pub use envcrypt_macro::option_envc;
-
-#[doc(hidden)]
-mod decrypt;
-
-/// For internal use only.
-#[doc(hidden)]
-pub mod __internal {
-    #[doc(hidden)]
-    pub use super::decrypt::decrypt;
-}

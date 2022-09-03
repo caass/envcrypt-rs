@@ -23,7 +23,7 @@ macro_rules! syntax_error {
     };
 }
 
-#[doc(hidden)]
+#[allow(missing_docs)]
 #[proc_macro_error]
 #[proc_macro]
 pub fn envc(tokens: TokenStream) -> TokenStream {
@@ -52,7 +52,7 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
     }
 }
 
-#[doc(hidden)]
+#[allow(missing_docs)]
 #[proc_macro_error]
 #[proc_macro]
 pub fn option_envc(tokens: TokenStream) -> TokenStream {
