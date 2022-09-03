@@ -66,9 +66,13 @@ let client_secret: &'static str = envc!("CLIENT_SECRET");
 
 ## Details
 
-Encryption is powered by [`RustCrypto`](https://github.com/RustCrypto/AEADs/tree/master/chacha20poly1305) using [ChaCha20Poly1305](https://tools.ietf.org/html/rfc8439) encryption. While this is a secure algorithm, it is used in a highly insecure way, which makes it unsuitable for secrets requiring real cryptographic security. `envcrypt` works encrypting an environment variable at compile time and then embedding the encrypted variable along with the encryption key in your binary. This means that an intrepid hacker can still decrypt your secrets, but it's not as trivial as running `strings`.
+Encryption is powered by [`RustCrypto`](https://github.com/RustCrypto/AEADs/tree/master/chacha20poly1305) using [ChaCha20Poly1305](https://tools.ietf.org/html/rfc8439) encryption.
 
-An analogy is that instead of leaving your front door open (embedding naked strings in your binary), you close and lock the door and put the key under the mat (embedding the encryption key). A criminal can still break in to your house, but simply having the door closed and locked will be enough to deter most people.
+While this is a secure algorithm, it is used in a highly insecure way, which makes it unsuitable for use-cases requiring real cryptographic security. `envcrypt` works by encrypting an environment variable at compile time and then embedding the encrypted variable along with the encryption key in your binary.
+
+This means that a hacker can still decrypt your secrets, but it's not as trivial as running `strings`.
+
+Here's an analogy: instead of leaving your front door open (embedding naked strings in your binary), you close and lock the door and put the key under the mat (embedding the encryption key). A criminal can still easily break in to your house, but simply having the door closed and locked will be enough to deter most people.
 
 You can check for yourself that your secrets are not visible in the binary by running `strings` on the compiled output:
 
