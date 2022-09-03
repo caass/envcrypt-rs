@@ -6,12 +6,9 @@ use std::env::{self, VarError};
 
 use proc_macro::{Literal, TokenStream, TokenTree};
 use proc_macro_error::{abort_call_site, proc_macro_error};
-use quote::quote;
 
-mod decrypt;
 mod encrypt;
-use decrypt::{decrypt, decrypt_none, decrypt_some};
-use encrypt::{encrypt, EncryptedVariable};
+use encrypt::encrypt;
 
 /// Shortcut for aborting due to a syntax error.
 macro_rules! syntax_error {
@@ -42,10 +39,7 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
     };
 
     match env::var(&env_var_key) {
-        Ok(unencrypted_variable) => {
-            let EncryptedVariable { key, value, nonce } = encrypt(unencrypted_variable);
-            decrypt!(key, value, nonce)
-        }
+        Ok(unencrypted_variable) => encrypt(unencrypted_variable),
 
         Err(VarError::NotUnicode(_)) => {
             abort_call_site!(
@@ -56,7 +50,6 @@ pub fn envc(tokens: TokenStream) -> TokenStream {
 
         Err(VarError::NotPresent) => abort_call_site!("{}", abort_message),
     }
-    .into()
 }
 
 #[doc(hidden)]
@@ -71,21 +64,14 @@ pub fn option_envc(tokens: TokenStream) -> TokenStream {
     };
 
     match env::var(&env_var_key) {
-        Ok(unencrypted_variable) => {
-            let EncryptedVariable { key, value, nonce } = encrypt(unencrypted_variable);
-            decrypt_some!(key, value, nonce)
-        }
-
         Err(VarError::NotUnicode(_)) => {
             abort_call_site!(
                 "Environment variable ${} contains non-unicode value",
                 &env_var_key
             )
         }
-
-        Err(VarError::NotPresent) => decrypt_none!(),
+        maybe_missing => encrypt(maybe_missing.ok()),
     }
-    .into()
 }
 
 /// Returns `Some(value)` if the provided literal was a string literal,

@@ -2,7 +2,7 @@
 
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
-    ChaCha20Poly1305, Nonce,
+    ChaCha20Poly1305, Key, Nonce,
 };
 
 /// Decrypts some bytes from a given key and nonce using exactly the same
@@ -10,12 +10,14 @@ use chacha20poly1305::{
 ///
 /// DO NOT CALL THIS FUNCTION YOURSELF. Decryption is handled automatically
 /// by the [`envc!`] and [`option_envc!`] macros at runtime.
-pub fn decrypt(key: &[u8], encrypted_variable: &[u8], nonce: &[u8]) -> &'static str {
-    let cipher = ChaCha20Poly1305::new_from_slice(key).unwrap();
+pub fn decrypt(data: &[u8]) -> &'static str {
+    let key = Key::from_slice(&data[..32]);
+    let nonce = Nonce::from_slice(&data[32..44]);
+    let ciphertext = &data[44..];
 
-    let decrypted_buffer = cipher
-        .decrypt(Nonce::from_slice(nonce), encrypted_variable)
-        .unwrap();
+    let cipher = ChaCha20Poly1305::new(key);
+
+    let decrypted_buffer = cipher.decrypt(nonce, ciphertext).unwrap();
 
     let decrypted_variable = String::from_utf8(decrypted_buffer)
         .unwrap()
