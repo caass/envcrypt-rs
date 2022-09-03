@@ -3,11 +3,10 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name    = "envcrypt-test"
 publish = false
-version = "0.3.0"
+version = "0.0.0"
 
 [package.metadata.release]
-shared-version = true
-tag            = false
+release = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
